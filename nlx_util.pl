@@ -215,15 +215,16 @@ v( axon_part_of, X, V ) :-
 */
 
 map_iri(NX,X) :-
-        NX id Frag,
+        NX id FragOrig,
+        fix_frag(FragOrig, Frag),
         xfrag(Frag,X).
 
 % Argh. Sometimes the value of the Id field is 'CHEBI: 10093'
 fix_frag(X,Y) :-
         concat_atom(Toks,' ',X),
-        X=[_,_|_],
+        Toks=[_,_|_],
         !,
-        concat_atom(Toks,Y).
+        concat_atom(Toks,'',Y).
 fix_frag(X,X).
 
         

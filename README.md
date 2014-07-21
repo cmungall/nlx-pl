@@ -10,6 +10,14 @@ Prolog has a number of benefits here:
  * Fast loading of nlx triples
  * More powerful programmatic / transformative/ declarative access than SPARQL
 
+This main goal of this project is to produce an OWL version of
+Neurolex that uses OBO Purls for classes, is suitable for reasoning,
+uses standard OWL axiomatic constructs (e.g. neuron-N SubClassOf
+soma_part_of some BrainRegion-A), removes duplication, fixes numerous
+nlx issues.
+
+It should also be useful for querying nlx in its standard RDF form.
+
 ## Dependencies
 
  * http://swi-prolog.org (tested on swipl 7)
