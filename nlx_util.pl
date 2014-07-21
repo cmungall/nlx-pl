@@ -1,39 +1,78 @@
+/* -*- Mode: Prolog -*- */
+
+:- use_module(library(debug)).
+:- use_module(library(semweb/rdf_turtle_write)).
+
 :- rdf_load_library(nlx).
 :- ensure_loaded(nlxs).
 
+:- rdf_register_ns(obo,'http://purl.obolibrary.org/obo/').
+
+
+%% pdump(+Pred) is det
+%
+% writes all triples using Pred as TSV
+%
 pdump(P) :-
         T =.. [P,_,_],
         forall(T, wtriple(T)).
 
-
+% write a triple as a TSV, using labels instead of URIs
 wtriple(T) :-
         T=..[P,X,Y],
         lbl(X,XN),
         lbl(Y,YN),
         format('~w\t~w\t~w~n',[P,XN,YN]).
 
+% IRI to labels.
+%
+% NOTE: any nlx IRI may have both rdfs:labels and its own label property
 lbl(X,XN) :- rdfs_label(X,XN),!.
 lbl(X,X).
 
-map_nlx :-
-        rdf_library_load(nlx),
-        rdf_library_load(ro),
-        map_nlx('http://purl.obolibrary.org/obo/cl/nlx.owl').
+nlxowl_uri('http://purl.obolibrary.org/obo/cl/nlx.owl').
+
+nlx2owl :-
+        debug(nlx),
+        rdf_load_library(nlx),
+        rdf_load_library(ro),
+        nlxowl_uri(Ont),
+        map_nlx(Ont),
+        rdf_save_turtle('nlx-owl.ttl',[graph(Ont)]).
 
 
+
+% Extract OWL axioms from triples using w/3,
+% assert into G
 map_nlx(G) :-
         v(P,X,Y),
         expand_pred(P,P2),
+        %debug(nlx,'~w -> [ ~w ] -> ~w',[X,P2,Y]),
         rdf_assert_wrap(X,P2,Y,G),
         fail.
 map_nlx(_).
 
+% rdf_assert/4 with special sauce for OWL shortcuts
 rdf_assert_wrap(X,P,some(Y),G) :-
         !,
-        foo.
+        debug(nlx,'~w SubClassOf  ~w SOME ~w',[X,P,Y]),
+        rdf_bnode(Restr),
+        rdf_assert(Restr,rdf:type,owl:'Restriction',G),
+        rdf_assert(X,rdfs:subClassOf,Restr,G),
+        rdf_assert(Restr,owl:onProperty,P,G),
+        rdf_assert(Restr,owl:someValuesFrom,Y,G).
 rdf_assert_wrap(X,P,Y,G) :-
-        rdf_assert(X,P,Y).
+        rdf_assert(X,P,Y,G).
 
+% TODO
+expand_pred(P,P).
+
+
+%% v( ?Pred, ?X, ?Y ) is nondet
+%
+% view predicate for generating OWLish triples from neurolex.
+% This is not as straightforward as mapping predicates;
+% we have to 'join' based on the Id field.
 
 :- rdf_meta v(r,r,r).
 
@@ -53,7 +92,6 @@ v( definition, X, literal(V) ) :-
 v( related_synonym, X, literal(V) ) :-
         NX synonym V,
         map_iri(NX,X).
-
   
 v( in_taxon, X, some(Y) ) :-
         NX species S,
@@ -91,7 +129,7 @@ Category:bipolar
   */
 
 v( has_quality, X, some(Y) ) :-
-        NX cellSomeShape NY,
+        NX cellSomaShape NY,
         map_iri(NX,X),
         map_iri(NY,Y).
 
@@ -179,6 +217,16 @@ v( axon_part_of, X, V ) :-
 map_iri(NX,X) :-
         NX id Frag,
         xfrag(Frag,X).
+
+% Argh. Sometimes the value of the Id field is 'CHEBI: 10093'
+fix_frag(X,Y) :-
+        concat_atom(Toks,' ',X),
+        X=[_,_|_],
+        !,
+        concat_atom(Toks,Y).
+fix_frag(X,X).
+
+        
 
 xfrag(Frag,X) :-
         is_obo_frag(Frag),

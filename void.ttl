@@ -17,3 +17,9 @@
     dcterms:title "nlx" ;
     void:dataDump <nlx_stage_all.rdf> ;
     lib:source <http://neurolex.org/> .
+
+:ro
+    a void:Dataset ;
+    dcterms:title "ro" ;
+    void:dataDump <ro.ttl> ;
+    lib:source <http://purl.obolibrary.org/obo/ro.owl> .
