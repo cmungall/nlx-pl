@@ -1,0 +1,19 @@
+@prefix    void: <http://rdfs.org/ns/void#> .
+@prefix	    lib: <http://www.swi-prolog.org/rdf/library/> .
+@prefix     owl: <http://www.w3.org/2002/07/owl#> .
+@prefix     rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix    rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix	dcterms: <http://purl.org/dc/terms/> .
+@prefix	   foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix     obo: <http://purl.obolibrary.org/obo/> .
+@prefix  uberon: <http://purl.obolibrary.org/obo/UBERON_> .
+@prefix       u: <http://purl.obolibrary.org/obo/uberon/> .
+@prefix  bridge: <http://purl.obolibrary.org/obo/uberon/bridge/> .
+@prefix      bm: <http://ontology.neuinfo.org/NIF/BiomaterialEntities/> .
+@prefix        : <http://purl.obolibrary.org/obo/uberon/> .
+
+:nlx
+    a void:Dataset ;
+    dcterms:title "nlx" ;
+    void:dataDump <nlx_stage_all.rdf> ;
+    lib:source <http://neurolex.org/> .
