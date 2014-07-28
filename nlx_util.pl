@@ -31,6 +31,11 @@ non_resource(X) :-
         X id _,
         \+ resource(X).
 
+show_non_resource_prop_usage :-
+        non_resource_prop_usage(P,Num),
+        format('~w\t~w~n',[Num,P]),
+        fail.
+show_non_resource_prop_usage.
 
 % IRI to labels.
 %
