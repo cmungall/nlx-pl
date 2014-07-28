@@ -24,6 +24,8 @@ wtriple(T) :-
         lbl(Y,YN),
         format('~w\t~w\t~w~n',[P,XN,YN]).
 
+
+
 % IRI to labels.
 %
 % NOTE: any nlx IRI may have both rdfs:labels and its own label property
@@ -99,13 +101,23 @@ v( in_taxon, X, some(Y) ) :-
         atom_concat('http://purl.obolibrary.org/obo/NCBITaxon_',TaxFrag,Y),
         map_iri(NX,X).
 
+% todo - soma part of
 v( part_of, X, some(Y) ) :-
         NX located_in NY,
         map_iri(NX,X),
         map_iri(NY,Y).
 
+v( part_of, X, some(Y) ) :-
+        NX is_part_of NY,
+        map_iri(NX,X),
+        map_iri(NY,Y).
+
 v( defining_criteria, X, literal(V) ) :-
         NX definingCriteria V,
+        map_iri(NX,X).
+
+v( abbreviation, X, literal(V) ) :-
+        NX abbrev V,
         map_iri(NX,X).
 
 /*
