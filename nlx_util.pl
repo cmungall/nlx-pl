@@ -24,6 +24,12 @@ wtriple(T) :-
         lbl(Y,YN),
         format('~w\t~w\t~w~n',[P,XN,YN]).
 
+non_resource_prop_usage(P,Num) :-
+        aggregate(count,V,X^(non_resource(X),rdf(X,P,V)),Num).
+
+non_resource(X) :-
+        X id _,
+        \+ resource(X).
 
 
 % IRI to labels.
