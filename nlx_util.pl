@@ -4,7 +4,9 @@
 :- use_module(library(semweb/rdf_turtle_write)).
 
 :- rdf_load_library(nlx).
+:- rdf_load_library(ro).
 :- ensure_loaded(nlxs).
+
 
 :- rdf_register_ns(obo,'http://purl.obolibrary.org/obo/').
 
@@ -24,6 +26,31 @@ wtriple(T) :-
         lbl(Y,YN),
         format('~w\t~w\t~w~n',[P,XN,YN]).
 
+:- rdf_meta id_pv(?,r,o).
+id_pv(Id,P,V) :-
+        X id Id,
+        rdf(X,P,V).
+
+
+% note: is reflexive
+sameid(X,Y) :-
+        X id Id,
+        Y id Id.
+
+electrophysiology_concept_a(Y) :-
+        electrophysiology_concept(X),
+        sameid(X,Y).
+
+neuron_a(Y) :-
+        neuron(X),
+        sameid(X,Y).
+
+ep_prop_usage(P,Num) :-
+        aggregate(count,V,X^(electrophysiology_concept_a(X),rdf(X,P,V)),Num).
+
+neuron_prop_usage(P,Num) :-
+        aggregate(count,V,X^(neuron_a(X),rdf(X,P,V)),Num).
+
 non_resource_prop_usage(P,Num) :-
         aggregate(count,V,X^(non_resource(X),rdf(X,P,V)),Num).
 
@@ -42,6 +69,10 @@ show_non_resource_prop_usage.
 % NOTE: any nlx IRI may have both rdfs:labels and its own label property
 lbl(X,XN) :- rdfs_label(X,XN),!.
 lbl(X,X).
+
+rdfs_label_2(X,L) :- rdfs_label(X,L).
+rdfs_label_2(X,L) :- rdf(X,rdfs:label,literal(type(_,L))).
+
 
 nlxowl_uri('http://purl.obolibrary.org/obo/cl/nlx.owl').
 
@@ -68,7 +99,7 @@ map_nlx(_).
 % rdf_assert/4 with special sauce for OWL shortcuts
 rdf_assert_wrap(X,P,some(Y),G) :-
         !,
-        debug(nlx,'~w SubClassOf  ~w SOME ~w',[X,P,Y]),
+        %debug(nlx,'~w SubClassOf  ~w SOME ~w',[X,P,Y]),
         rdf_bnode(Restr),
         rdf_assert(Restr,rdf:type,owl:'Restriction',G),
         rdf_assert(X,rdfs:subClassOf,Restr,G),
@@ -77,7 +108,16 @@ rdf_assert_wrap(X,P,some(Y),G) :-
 rdf_assert_wrap(X,P,Y,G) :-
         rdf_assert(X,P,Y,G).
 
-% TODO
+% we use shorthand such as in_taxon in this module;
+% these are expanded to complete IRIs, based on label.
+% this relies on rdfs:labels being loader for RO, IAO, etc
+expand_pred(P,PIRI) :-
+        %debug(nlx,'EXP: ~w',[P]),
+        concat_atom(Toks,'_',P),
+        concat_atom(Toks,' ',Label),
+        rdfs_label_2(PIRI,Label),
+        atom_concat('http://purl.obolibrary.org/obo/',_,PIRI),
+        !.
 expand_pred(P,P).
 
 
@@ -87,7 +127,7 @@ expand_pred(P,P).
 % This is not as straightforward as mapping predicates;
 % we have to 'join' based on the Id field.
 
-:- rdf_meta v(r,r,r).
+:- rdf_meta v(o,r,r).
 
 v( rdfs:subClassOf, X, Y ) :-
         rdf(NX, rdfs:subClassOf, NY),
@@ -120,6 +160,11 @@ v( part_of, X, some(Y) ) :-
 
 v( part_of, X, some(Y) ) :-
         NX is_part_of NY,
+        map_iri(NX,X),
+        map_iri(NY,Y).
+
+v( fasciculates_with, X, some(Y) ) :-
+        NX fasciculates_with NY,
         map_iri(NX,X),
         map_iri(NY,Y).
 
