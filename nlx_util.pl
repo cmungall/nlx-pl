@@ -282,9 +282,18 @@ v( axon_part_of, X, V ) :-
         map_iri(NX,X).
 */
 
+% We take the Id property as primary, and use this to construct a URI.
+% Note that some resources share an Id field, so we end up 'collapsing' or mapping these onto a common IRI - this is intentional.
 map_iri(NX,X) :-
         NX id FragOrig,
-        fix_frag(FragOrig, Frag),
+        fix_frag(FragOrig, Frag),  % repair
+        xfrag(Frag,X).
+
+% occasionally some classes do not have Ids - e.g. 'http://neurolex.org/wiki/Category-3ACell_layer'
+map_iri(NX,X) :-
+        rdf(NX_Equiv, owl:sameAs, NX),
+        NX_Equiv id FragOrig,
+        fix_frag(FragOrig, Frag),  % repair
         xfrag(Frag,X).
 
 % Argh. Sometimes the value of the Id field is 'CHEBI: 10093'
@@ -296,7 +305,8 @@ fix_frag(X,Y) :-
 fix_frag(X,X).
 
         
-
+% expand a fragment;
+% map all OBO-like IDs to OBO, and everything else to nifstd
 xfrag(Frag,X) :-
         is_obo_frag(Frag),
         !,

@@ -8,13 +8,13 @@ extracting information from NeuroLex.
 Prolog has a number of benefits here:
 
  * Fast loading of nlx triples
- * More powerful programmatic / transformative/ declarative access than SPARQL
+ * More powerful programmatic/transformative/declarative access than SPARQL
 
 This main goal of this project is to produce an OWL version of
 Neurolex that uses OBO Purls for classes, is suitable for reasoning,
 uses standard OWL axiomatic constructs (e.g. neuron-N SubClassOf
 soma_part_of some BrainRegion-A), removes duplication, fixes numerous
-nlx issues.
+nlx issues (such as duplication of concepts).
 
 It should also be useful for querying nlx in its standard RDF form.
 
@@ -55,6 +55,7 @@ The following show interactive queries that can be performed in the shell:
 
 ### iterate over neurons
 
+A unary predicate is created for every nlx class:
 
     ?- neuron(X).
     X = 'http://neurolex.org/wiki/Sao2128417084' ;
@@ -64,7 +65,13 @@ The following show interactive queries that can be performed in the shell:
     X = 'http://neurolex.org/wiki/Nifext_152' ;
     X = 'http://neurolex.org/wiki/Sao666951243' .
 
+Other useful upper level classes:
+
+ * regional_part_of_brain
+
 ### iterate over neurons, showing labels and location
+
+A binary predicate is created for every nlx property:
     
     ?- neuron(X),rdfs_label(X,L),located_in(X,S).
     X = 'http://neurolex.org/wiki/Sao2128417084',
