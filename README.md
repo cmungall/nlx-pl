@@ -23,6 +23,7 @@ It should also be useful for querying nlx in its standard RDF form.
  * http://swi-prolog.org (tested on swipl 7)
  * unix make
  * wget
+ * owltools (optional)
 
 ## Getting started
 
@@ -70,10 +71,10 @@ A unary predicate is created for every nlx class:
     X = 'http://neurolex.org/wiki/Nifext_152' ;
     X = 'http://neurolex.org/wiki/Sao666951243' .
 
-Other useful upper level classes:
+Other useful unary predicates:
 
- * regional_part_of_brain
- * parcellation_scheme_parcel
+ * regional_part_of_brain/1
+ * parcellation_scheme_parcel/1
 
 ### iterate over neurons, showing labels and location
 
@@ -97,6 +98,11 @@ the capabilities here are similar to SPARQL. However, it is easier to
 mix in programmatic features, plus whatever rules you like, defined in
 prolog.
 
+Other useful binary predicates:
+
+ * located_in/2
+ * species/2
+
 ## Transforming Nlx to OWL
 
 The primary purpose of this codebase is to provide a "reason-able"
@@ -105,14 +111,34 @@ oddities in the RDF representation of neurolex (see Notes, below).
 
 Type
 
+    make nlx-owl.ttl
+
+This is the same as:
+
     swipl -g [nlx_util],nlx2owl,halt
 
 (no spaces after commas)
 
 This is a work in progress. Gradually mapping more nlx predicates.
 
+### OWL Modules
+
+OWLTools is required for making modules. http://code.google.com/p/owltools
+
+See the Makefile for pre-defined modules. It should be easy to add
+more.
+
+Neuron module:
+
+    make nlx-neuron.owl
+
+Nervous system part module (combo of parcels, parts of nervous system, and cell layers):
+
+    make nlx-ns-part.owl
 
 ## Notes
+
+(rough notes follow)
 
 The neurolex triplestore has dual representations of everything.
 
@@ -132,6 +158,8 @@ E.g. for http://uri.neuinfo.org/nif/nifstd/sao2128417084
 
 We rely on the Id field to unify everything.
 
-Be careful - sometimes spaces are randomly inserted, e.g.
+Need to be careful - sometimes spaces are randomly inserted, e.g.
 
 'CHEBI: 10093'
+
+nlx_util.pl has some hacky code for handling this.
