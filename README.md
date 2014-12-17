@@ -36,6 +36,8 @@ This will pull the raw triples from the neurolex rdf dump (nlx_stage_all.rdf) in
 
 ### Querying neurolex
 
+(This section assumes a minimal knowledge of prolog - to query the OWL scroll down to 'transforming nlx to OWL')
+
 Type
 
     swipl -g [nlx_util]
