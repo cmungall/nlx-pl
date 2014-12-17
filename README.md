@@ -22,6 +22,7 @@ It should also be useful for querying nlx in its standard RDF form.
 
  * http://swi-prolog.org (tested on swipl 7)
  * unix make
+ * wget
 
 ## Getting started
 
@@ -31,7 +32,11 @@ Type
 
     make nlx_stage_all.rdf
 
+This will pull the raw triples from the neurolex rdf dump (nlx_stage_all.rdf) into a local file
+
 ### Querying neurolex
+
+(This section assumes a minimal knowledge of prolog - to query the OWL scroll down to 'transforming nlx to OWL')
 
 Type
 
@@ -39,7 +44,7 @@ Type
 
 This will start a SWIPL session, loading the nlx_util.pl prolog code,
 which defines helper predicates, and also calls
-'rdf_load_library(nlx)'.
+'rdf_load_library(nlx)'. 
 
 The first time this is called it will take a few minutes as there is a
 lot of RDF to parse. This will create a directory RDF-Cache/ with a
