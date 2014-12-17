@@ -22,6 +22,7 @@ It should also be useful for querying nlx in its standard RDF form.
 
  * http://swi-prolog.org (tested on swipl 7)
  * unix make
+ * wget
 
 ## Getting started
 
