@@ -68,6 +68,7 @@ A unary predicate is created for every nlx class:
 Other useful upper level classes:
 
  * regional_part_of_brain
+ * parcellation_scheme_parcel
 
 ### iterate over neurons, showing labels and location
 
