@@ -32,6 +32,8 @@ Type
 
     make nlx_stage_all.rdf
 
+This will pull the raw triples from the neurolex rdf dump (nlx_stage_all.rdf) into a local file
+
 ### Querying neurolex
 
 Type
@@ -40,7 +42,7 @@ Type
 
 This will start a SWIPL session, loading the nlx_util.pl prolog code,
 which defines helper predicates, and also calls
-'rdf_load_library(nlx)'.
+'rdf_load_library(nlx)'. 
 
 The first time this is called it will take a few minutes as there is a
 lot of RDF to parse. This will create a directory RDF-Cache/ with a
