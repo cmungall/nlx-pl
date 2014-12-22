@@ -9,6 +9,7 @@
 
 
 :- rdf_register_ns(obo,'http://purl.obolibrary.org/obo/').
+:- rdf_register_ns(oio,'http://www.geneontology.org/formats/oboInOwl#').
 
 
 %% pdump(+Pred) is det
@@ -112,6 +113,10 @@ rdf_assert_wrap(X,P,Y,G) :-
 % these are expanded to complete IRIs, based on label.
 % this relies on rdfs:labels being loader for RO, IAO, etc
 expand_pred(P,PIRI) :-
+        pmap(P,Frag),
+        !,
+        atom_concat('http://purl.obolibrary.org/obo/',Frag,PIRI).
+expand_pred(P,PIRI) :-
         %debug(nlx,'EXP: ~w',[P]),
         concat_atom(Toks,'_',P),
         concat_atom(Toks,' ',Label),
@@ -142,10 +147,19 @@ v( definition, X, literal(V) ) :-
         NX definition V,
         map_iri(NX,X).
 
-v( related_synonym, X, literal(V) ) :-
+v( oio:hasRelatedSynonym, X, literal(V) ) :-
         NX synonym V,
         map_iri(NX,X).
-  
+
+% TODO: make this leff obo-centric
+% this is useful for now as we don't have a way of tracking 'merges' in the nlx2owl transition
+v( oio:hasDbXref, X, literal(V) ) :-
+        NX id Id,
+        downcase_atom(Id,Id_Dn),
+        atom_concat('nifstd:',Id_Dn),
+        map_iri(NX,X).
+
+
 v( in_taxon, X, some(Y) ) :-
         NX species S,
         S taxID TaxFrag,
@@ -163,10 +177,28 @@ v( part_of, X, some(Y) ) :-
         map_iri(NX,X),
         map_iri(NY,Y).
 
+v( overlaps, X, some(Y) ) :-
+        NX partiallyOverlapsWith NY,
+        map_iri(NX,X),
+        map_iri(NY,Y).
+
 v( fasciculates_with, X, some(Y) ) :-
         NX fasciculates_with NY,
         map_iri(NX,X),
         map_iri(NY,Y).
+
+% Notes from DOS:
+% Possibly - has presynaptic terminal in?  (seems safe to assume
+% terminal arbor of axon forms synapses - at least in most cases).
+% Defining 'arborizes in' would be harder as formal of arbor may be
+% hard.  Maybe 'has terminal arbor in' SubProperty of overlaps) -
+% letting user judgment apply for what counts as terminal arbor.
+v( has presynaptic terminal in, X, some(Y) ) :-
+        NX location_of_distant_axon_arborization NY,
+        map_iri(NX,X),
+        map_iri(NY,Y).
+
+
 
 v( defining_criteria, X, literal(V) ) :-
         NX definingCriteria V,
@@ -201,6 +233,7 @@ v( has_quality, X, some(Y) ) :-
         map_iri(NX,X),
         map_iri(NY,Y).
 
+% TODO
 v( has_quality, X, some(Y) ) :-
         NX neurotransmitter NY,
         map_iri(NX,X),
@@ -284,6 +317,7 @@ v( axon_part_of, X, V ) :-
 
 % We take the Id property as primary, and use this to construct a URI.
 % Note that some resources share an Id field, so we end up 'collapsing' or mapping these onto a common IRI - this is intentional.
+% additionally, some resources may have >1 Id value
 map_iri(NX,X) :-
         NX id FragOrig,
         fix_frag(FragOrig, Frag),  % repair
@@ -318,8 +352,15 @@ xfrag(Frag,X) :-
 is_obo_frag(Frag) :- atom_concat('CHEBI',_,Frag).
 is_obo_frag(Frag) :- atom_concat('UBERON',_,Frag).
 
+dupe(A,B,Id) :-
+        id(A,Id),
+        \+ atom_concat('http://neurolex.org/wiki/Category',_,A),
+        id(B,Id),
+        \+ atom_concat('http://neurolex.org/wiki/Category',_,B),
+        A@<B.
         
-        
+pmap(in_taxon,'RO_0002162').
+
 
 
 

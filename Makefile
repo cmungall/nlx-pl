@@ -1,5 +1,9 @@
 OBO := http://purl.obolibrary.org/obo
 
+all: nlx-ns-part.owl nlx-neuron.owl
+
+all_obo: all nlx-ns-part-dn.obo
+
 # fetch RDF
 nlx_stage_all.rdf: 
 	wget -N http://neurolex.org/OWL/$@
@@ -7,6 +11,11 @@ nlx_stage_all.rdf:
 # Neurolex schema
 # note: this only needs regenerated if the properties or core classes in the Nlx RDF
 # change substantially. the version in the repo should be good enough for most purposes.
+# Dependency: http://www.swi-prolog.org/pack/list?p=rdfs2pl
+#
+# Type:
+#   swipl
+#   pack_install(rdfs2pl)
 nlxs.pl: nlx_stage_all.rdf
 	swipl -g "[generate_schema],gen,halt"
 
@@ -21,8 +30,17 @@ nlx-owl.owl: nlx-owl.ttl
 nlx-neuron.owl: nlx-owl.owl
 	owltools --use-catalog $< --reasoner-query -r elk -d -c nlx/neuron -l Neuron -o $@
 
-nlx-ns-part.owl: nlx-owl.owl
-	owltools --use-catalog $< --reasoner-query -r elk -d -c nlx/ns-part -l 'Regional part of nervous system' -o $@
+nlx-rpons.owl: nlx-owl.owl
+	owltools --use-catalog $< --reasoner-query -r elk -d -c nlx/ns-rpons -l 'Regional part of nervous system' -o $@
+
+nlx-parcel.owl: nlx-owl.owl
+	owltools --use-catalog $< --reasoner-query -r elk -d -c nlx/ns-parcel -l 'Parcellation scheme parcel' -o $@
+
+nlx-cell-layer.owl: nlx-owl.owl
+	owltools --use-catalog $< --reasoner-query -r elk -d -c nlx/cell-layer nlx_149357 -o $@
+
+nlx-ns-part.owl: nlx-rpons.owl nlx-cell-layer.owl nlx-parcel.owl
+	owltools --use-catalog $^ --merge-support-ontologies -o $@
 
 nlx-epc.owl: nlx-owl.owl
 	owltools --use-catalog $< --reasoner-query -r elk -d -c $(OBO)/nlx/epc -l 'Electrophysiology concept' -o $@
